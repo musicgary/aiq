@@ -1,0 +1,323 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIQUANTA Limited</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts (Montserrat for non-titles) -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            color: #ffffff;
+            background-color: #f8f9fa;
+            padding-top: 70px; /* Offset for fixed navbar */
+        }
+        /* Navbar Styling (Liberty Partners style) */
+        .navbar {
+            background-color: #1a1a1a;
+            box-shadow: 0 2px 5px rgb(255, 255, 255);
+            padding: 15px 0;
+        }
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: hsl(0, 0%, 100%);
+        }
+        .navbar-brand:hover {
+            color: rgb(255, 255, 255);
+        }
+        .nav-link {
+            font-size: 0.8rem;
+            color: #ffffff;
+            margin: 0 10px;
+            transition: color 0.3s;
+        }
+        .nav-link:hover {
+            color: #ffffff;
+            text-decoration: underline !important;
+        }
+        .nav-link.active {
+            color: rgb(255, 255, 255) !important;
+            font-weight: 600;            
+            text-decoration-color: #ff6200 ;
+        }
+        .navbar-toggler {
+            color: hsl(0, 0%, 100%);
+            border: none;
+        }
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(51, 51, 51, 0.8)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        }
+        /* Content Styling */
+        .content-section {
+            padding: 40px 0;
+            display: none; /* Hidden by default */
+        }
+        .content-section.active {
+            display: block; /* Show when active */
+        }
+        .content-container {
+            max-width: 900px; /* Centered 600px width */
+            margin: 0 auto;
+            text-align: left;
+        }
+        .content-container h1 {
+            max-width: 800px; /* Centered 600px width */
+            font-family: "Times New Roman", Times, serif; /* Changed to Times New Roman */
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-top: 4cm;
+            color: #000000;
+            text-align: center;
+        }
+        .content-container h2 {
+            font-family: "Times New Roman", Times, serif; /* Changed to Times New Roman */
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: #000000;
+            margin-top: 2cm;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .content-container h3 {
+            font-family: "Times New Roman", Times, serif; /* Changed to Times New Roman */
+            font-size: 1.75rem;
+            font-weight: 200;
+            color: #000000;
+            text-align: center;
+            margin-top: 2cm;
+            margin-bottom: -2cm;
+        }
+        .content-container p, .content-container ul {
+            max-width: 600px;
+            margin: 0 auto;
+            font-size: 1rem;
+            line-height: 1.8;
+            color: #555;
+            margin-bottom: 20px;
+        }
+        .content-container p2 {
+            max-width: 450px;
+            margin: 0 auto;
+            font-size: 0.8rem;
+            line-height: 1.3;
+            text-align: center;
+            margin-top: 20px;
+            color: #555;
+        }
+        .content-container ul {
+            padding-left: 20px;
+        }
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            max-width: 800px;
+            margin: 20px auto;
+        }
+        .team-member {
+            background-color: #fff;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(255, 255, 255, 0.1);
+        }
+
+        .team-member p {
+            font-size: 0.9rem;
+            color: #777;
+        }
+        @media (max-width: 768px) {
+            .content-container {
+                max-width: 90%;
+            }
+            .content-container h1 {
+                font-size: 2rem;
+            }
+            .nav-link {
+                margin: 10px 0;
+            }
+        }
+        img {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar (Liberty Partners style) -->
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#home"><img src="logo.jpg" alt="AIQUANTA Logo" style="height: 90px; margin-left: 130px"></a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#home" onclick="showSection('home')">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#about" onclick="showSection('about')">About Us</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#LCoS" onclick="showSection('LCoS')">LCoS Panel</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#FPGA" onclick="showSection('FPGA')">FPGA</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#silicon" onclick="showSection('silicon')">Silicon Photonics</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#contact" onclick="showSection('contact')">Contact Us</a>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+
+    </nav>
+
+    <!-- Home Section (A Commitment to Innovation) -->
+    <section id="home" class="content-section active">
+        <div class="content-container">
+            <h1>Welcome to AIQUANTA LIMITED</h1>            
+            <h2>A Commitment to Innovation</h1>
+            <p>At AIQUANTA, we are driven by a passion for innovation in optoelectronics and semiconductor technology. Based in the Hong Kong Science and Technology Park, our work in Silicon Photonics, Liquid Crystal on Silicon (LCoS), and advanced beam steering is shaping the future of industries such as automotive, robotics, 3D packaging, and quantum computing.</p>
+            <img src="gold_egg.jpg" style="width:100%;">
+            <h3>*</h3>
+            <h2>A Passion for Engineering</h2>
+            <p>Our commitment to pioneering breakthroughs reflects the innovation symbolized by the nearby Sir Charles Kao Auditorium—named after the photonics pioneer whose spirit inspires us. As Sir Charles Kao said, “Ideas do not always come in a flash but by diligent trial-and-error experiments that take time and thought.” This dedication to thoughtful experimentation guides every step of our journey.</p>
+            <img src="home2.png" style="width:45%;">
+            <h3>*</h3>
+            <h2>A Focus on Impact</h2>
+            <p>Discover how AIQUANTA is contributing to HKSTP’s mission to transform ideas into technological realities that impact the world.</p>
+            <img src="home3.png" style="width:45%;">
+            <h2></h2>
+            <img src= "logo.jpg" style="height: 60px">
+            <p2 style="text-align: center;">Room 616, Building 12W, Phase 3 <br>
+            Hong Kong Science & Technology Park, Shatin, N.T., Hong Kong<br>
+            Phone: (852) 3618 7676<br>
+            Email: ricafan@aiquanta.ai<br>
+            Office Hours: Monday to Friday, 9:00 AM – 6:00 PM</p2>
+        </div>
+    </section>
+
+    <!-- About Section (About Us) -->
+    <section id="about" class="content-section">
+        <div class="content-container">
+            <h1>About Us</h1>
+            <h2>Who We Are</h2>
+            <p>AIQUANTA Limited is a cutting-edge technology company based in Hong Kong Science and Technology Park. We specialize in the research and development of advanced optoelectronic and semiconductor devices for beam steering and optical switching using non-mechanical components. Our product portfolio includes Silicon Photonics, Liquid Crystal on Silicon (LCoS), and other innovative devices catering to the automotive, robotics, 3D packaging, and emerging quantum computing markets.</p>
+            <h2>Our Mission</h2>
+            <p>Our mission is to deliver innovative optoelectronic solutions that push the boundaries of technology. We aim to enable practical applications of next-generation chips by partnering with leading optoelectronic foundries worldwide, ensuring our customers stay at the forefront of industry advancements.</p>
+            <h2>What We Do</h2>
+            <p>We develop tailor-made electro-optic devices and sub-systems that meet the stringent demands of various sectors including automotive, robotics, computer vision, and quantum computing. Leveraging our expertise in AI, 3D sensing, and LiDAR technologies, we provide professional, highly realistic 3D sensing and virtual reality solutions that serve diverse industries and applications.</p>
+            <h2>Why Choose Us?</h2>
+            <ul>
+                <li>Expert team with extensive experience in AI-driven photonics and semiconductor technologies</li>
+                <li>Strong industry and academic collaboration to ensure cutting-edge innovation</li>
+                <li>Proven track record delivering 3D sensing solutions, LiDAR scanning, and integrated AI systems</li>
+            </ul>
+            <h2>Meet Our Team</h2>
+            <p>Our breakthrough technology is powered by an even greater resource: the exceptional minds behind it.</p>
+            <div class="team-grid">
+                <div class="team-member">
+                    <h3>Nim Cheung</h3>
+                    <p>Managing Director</p>
+                </div>
+                <div class="team-member">
+                    <h3>Rica Fan</h3>
+                    <p>Executive Director</p>
+                </div>
+                <div class="team-member">
+                    <h3>KC Sum</h3>
+                    <p>Principal Engineer</p>
+                </div>
+                <div class="team-member">
+                    <h3>Tom Cheng</h3>
+                    <p>Principal Scientist</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section (Placeholder) -->
+    <section id="contact" class="content-section">
+        <div class="content-container">
+            <h1>Contact Us</h1>
+            <p>Reach out to AIQUANTA for inquiries about our optoelectronic solutions.</p>
+            <p>Email: info@aiquanta.com</p>
+            <p>Address: Hong Kong Science and Technology Park, Hong Kong</p>
+        </div>
+    </section>
+
+    <!-- JavaScript for Content Switching -->
+    <script>
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            // Show selected section
+            document.getElementById(sectionId).classList.add('active');
+            // Update active nav link
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${sectionId}`) {
+                    link.classList.add('active');
+                }
+            });
+        }
+        // Show 'home' section by default
+        showSection('home');
+    </script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

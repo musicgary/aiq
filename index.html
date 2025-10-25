@@ -1,0 +1,468 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+</script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIQUANTA Limited</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts (Montserrat for non-titles) -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            color: #ffffff;
+            background-color: #f8f9fa;
+            padding-top: 70px; /* Offset for fixed navbar */
+        }
+        /* Navbar Styling (Liberty Partners style) */
+        .navbar {
+            background-color: #1a1a1a;
+            box-shadow: 0 2px 5px rgb(255, 255, 255);
+            padding: 15px 0;
+        }
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: hsl(0, 0%, 100%);
+        }
+        .navbar-brand:hover {
+            color: rgb(255, 255, 255);
+        }
+        .nav-link {
+            font-size: 1rem;
+            color: #ffffff;
+            margin: 0 10px;
+            transition: color 0.3s;
+        }
+        .nav-link:hover {
+            color: #ffffff;
+            text-decoration: underline !important;
+        }
+        .nav-link.active {
+            color: rgb(255, 255, 255) !important;
+            font-weight: 600;            
+            text-decoration-color: #ff6200;
+        }
+        .navbar-toggler {
+            color: hsl(0, 0%, 100%);
+            border: none;
+        }
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(51, 51, 51, 0.8)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        }
+        /* Content Styling */
+        .content-section {
+            padding: 40px 0;
+            display: none; /* Hidden by default */
+        }
+        .content-section.active {
+            display: block; /* Show when active */
+        }
+        .content-container {
+            max-width: 900px; /* Centered 900px width */
+            margin: 0 auto;
+            text-align: left;
+        }
+        .content-container h1 {
+            max-width: 800px;
+            font-family: "Times New Roman", Times, serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-top: 4cm;
+            margin-left: 1.2cm;
+            color: #000000;
+            text-align: center;
+        }
+        .content-container h2 {
+            font-family: "Times New Roman", Times, serif;
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: #000000;
+            margin-top: 2cm;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .content-container h3 {
+            font-family: "Times New Roman", Times, serif;
+            font-size: 1.75rem;
+            font-weight: 200;
+            color: #000000;
+            text-align: center;
+            margin-top: 2cm;
+            margin-bottom: -2cm;
+        }
+        .content-container p, .content-container ul {
+            max-width: 600px;
+            margin: 0 auto;
+            font-size: 1rem;
+            line-height: 1.8;
+            color: #555;
+            margin-bottom: 20px;
+        }
+        /* .content-container .footer-contact {
+            max-width: 450px;
+            margin: 0 auto;
+            font-size: 0.8rem;
+            line-height: 1.3;
+            text-align: left;
+            margin-top: 20px;
+            color: #555;
+            margin-left: 27%
+        } */
+        .content-container ul {
+            padding-left: 20px;
+        }
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            max-width: 900px;
+            margin: 20px auto;
+        }
+        .team-member {
+            background-color: #fff;
+            /* padding: 20px; */
+            text-align: center;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(255, 255, 255, 0.1);
+        }
+        .team-member p {
+            font-size: 0.7rem;
+            line-height: 1.0;
+            color: rgb(0, 0, 0);
+            margin: 8px auto;
+        }
+        /* Footer Styling */
+        .footer-contact {
+            max-width: 450px;
+            margin: 0 auto;
+            font-size: 0.8rem;
+            line-height: 1.3;
+            text-align: left;
+            margin-top: 20px;
+            color: #555;
+            margin-left: 39%
+        }
+        @media (max-width: 768px) {
+            .content-container {
+                max-width: 90%;
+            }
+            .content-container h1 {
+                font-size: 2rem;
+            }
+            .nav-link {
+                margin: 10px 0;
+            }
+        }
+        img {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar (Liberty Partners style) -->
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#home" onclick="showSection('home')"><img src="upload/logo.jpg" alt="AIQUANTA Logo" style="height: 90px; margin-left: 60px"></a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#home" onclick="showSection('home')">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#about" onclick="showSection('about')">About Us</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#LCoS" onclick="showSection('LCoS')">LCoS Panel</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#FPGA" onclick="showSection('FPGA')">FPGA</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#silicon" onclick="showSection('silicon')">Silicon Photonics</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#contact" onclick="showSection('contact')">Contact Us</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Home Section (A Commitment to Innovation) -->
+    <section id="home" class="content-section active">
+        <div class="content-container">
+            <h1>Welcome to AIQUANTA LIMITED</h1>            
+            <h2>A Commitment to Innovation</h2>
+            <p>At AIQUANTA, we are driven by a passion for innovation in optoelectronics and semiconductor technology. Based in the Hong Kong Science and Technology Park, our work in Silicon Photonics, Liquid Crystal on Silicon (LCoS), and advanced beam steering is shaping the future of industries such as automotive, robotics, 3D packaging, and quantum computing.</p>
+            <img src="upload/gold_egg.jpg" style="width:100%;">
+            <h3>*</h3>
+            <h2>A Passion for Engineering</h2>
+            <p>Our commitment to pioneering breakthroughs reflects the innovation symbolized by the nearby Sir Charles Kao Auditorium—named after the photonics pioneer whose spirit inspires us. As Sir Charles Kao said, “Ideas do not always come in a flash but by diligent trial-and-error experiments that take time and thought.” This dedication to thoughtful experimentation guides every step of our journey.</p>
+            <img src="upload/home2.png" style="width:65%;">
+            <h3>*</h3>
+            <h2>A Focus on Impact</h2>
+            <p>Discover how AIQUANTA is contributing to HKSTP’s mission to transform ideas into technological realities that impact the world.</p>
+            <img src="upload/home3.png" style="width:65%;">
+            <!-- <h2></h2> -->
+            <!-- <img src="logo.jpg" style="height: 60px"> -->
+        </div>
+    </section>
+
+    <!-- About Section (About Us) -->
+    <section id="about" class="content-section">
+        <div class="content-container">
+            <h1>About Us</h1>
+            <h2>Who We Are</h2>
+            <p>AIQUANTA Limited is a cutting-edge technology company based in Hong Kong Science and Technology Park. We specialize in the research and development of advanced optoelectronic and semiconductor devices for beam steering and optical switching using non-mechanical components. Our product portfolio includes Silicon Photonics, Liquid Crystal on Silicon (LCoS), and other innovative devices catering to the automotive, robotics, 3D packaging, and emerging quantum computing markets.</p>
+            <img src="upload/about1.png" style="width:50%;">
+            <h2>Our Mission</h2>
+            <p>Our mission is to deliver innovative optoelectronic solutions that push the boundaries of technology. We aim to enable practical applications of next-generation chips by partnering with leading optoelectronic foundries worldwide, ensuring our customers stay at the forefront of industry advancements.</p>
+            <h2>What We Do</h2>
+            <p>We develop tailor-made electro-optic devices and sub-systems that meet the stringent demands of various sectors including automotive, robotics, computer vision, and quantum computing. Leveraging our expertise in AI, 3D sensing, and LiDAR technologies, we provide professional, highly realistic 3D sensing and virtual reality solutions that serve diverse industries and applications.</p>
+            <h2>Why Choose Us?</h2>
+            <ul>
+                <li>Expert team with extensive experience in AI-driven photonics and semiconductor technologies</li>
+                <li>Strong industry and academic collaboration to ensure cutting-edge innovation</li>
+                <li>Proven track record delivering 3D sensing solutions, LiDAR scanning, and integrated AI systems</li>
+            </ul>
+            <img src="upload/about2.png" style="width:50%;">
+            <h2>Meet Our Team</h2>
+            <p>Our breakthrough technology is powered by an even greater resource: the exceptional minds behind it.</p>
+            <div class="team-grid">
+                <div class="team-member">
+                    <img src="upload/Nim.webp" style="width:100%;">
+                    <p></p>
+                    <p><b>Nim Cheung</b></p>
+                    <p>Managing Director</p>
+                </div>
+                <div class="team-member">
+                    <img src="upload/Rica.webp" style="width:100%;">
+                    <p></p>
+                    <p><b>Rica Fan</b></p>
+                    <p>Executive Director</p>
+                </div>
+                <div class="team-member">
+                    <img src="upload/KC.webp" style="width:100%;">
+                    <p></p>
+                    <p><b>KC Sum</b></p>
+                    <p>Principal Engineer</p>
+                </div>
+                <div class="team-member">
+                    <img src="upload/Tom.webp" style="width:100%;">
+                    <p></p>
+                    <p><b>Tom Cheng</b></p>
+                    <p>Principal Scientist</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- LCoS Panel Section (Placeholder) -->
+    <section id="LCoS" class="content-section">
+        <div class="content-container">
+            <h1>LCoS Panel</h1>
+            <h2>Wafers</h2>
+            <p>Wafers form the fundamental base for creating Liquid Crystal on Silicon (LCoS) devices. These thin, polished slices of semiconductor material,
+                 usually silicon, undergo precise fabrication processes involving cleaning, coating, etching, and layering. 
+                The quality and uniformity of wafers are critical as they determine the performance and reliability of the
+                 resulting LCoS panels used in advanced optical applications.</p>
+            <img src="upload/lcos1.jpg" style="float:left;width:300px;height:300px;margin-left: 4cm;margin-right: 4mm;">
+            <p style="margin-top: 4cm; margin-bottom: 4cm;">8-inch wafer of silicon substrate <br> before the addition of liquid <br> crystal.</p>
+            <h2>What is LCOS?</h2>
+            <p>Liquid Crystal on Silicon (LCoS) is a reflective microdisplay technology that uses liquid crystals layered on a silicon
+                 backplane to modulate light at the pixel level. LCOS panels offer high resolution, fast response times, and compact form 
+                 factors, making them essential components in applications like projectors, augmented reality, and wavelength-selective 
+                 switching, where precise control of light is required.</p>
+            <img src="upload/lcos2.png" style="width:70%;">
+            <h2>Our LCOS Panel</h2>
+            <p>Our project utilizes a specialized LCOS panel built from carefully processed wafers and optimized for superior optical performance in advanced sensing and communication applications. 
+                This custom LCOS device integrates seamlessly with our other technologies to deliver high precision and reliability. Below is an image of the actual wafer used in our device fabrication.</p>
+            <img src="upload/lcos3.png" style="width:70%;">    
+        </div>
+    </section>
+
+    <!-- FPGA Section (Placeholder) -->
+    <section id="FPGA" class="content-section">
+        <div class="content-container">
+            <h1>FPGA Technology</h1>
+            <img src="upload/fpga1.png" style="width:70%;margin-top: 1cm; margin-bottom: 4mm;"> 
+            <p>A Field Programmable Gate Array (FPGA) is a highly versatile integrated circuit that can be configured and reprogrammed after 
+                manufacturing to perform a wide range of digital functions. Unlike fixed-function chips, FPGAs provide exceptional flexibility,
+                 enabling rapid prototyping, customization, and parallel processing to meet evolving application needs. Their reconfigurable
+                  architecture makes them ideal for complex, high-performance tasks in telecommunications, automotive systems, aerospace, and cutting-edge photonics.
+            </p>
+            <img src="upload/fpga2.jpg" style="width:70%;margin-top: 1cm; margin-bottom: 4mm;"> 
+            <p>
+            The image above shows the FPGA used for this project. It controls how each pixel of the Liquid Crystal on Silicon
+             (LCoS) panel turns on or off, determining the diffraction patterns formed. By programming each pixel 
+            individually to be either active or inactive, the FPGA dynamically modulates the light reflected by the LCoS, 
+            enabling precise control over the optical output.
+            </p>
+        </div>
+    </section>
+
+    <!-- Silicon Photonics Section (Placeholder) -->
+    <section id="silicon" class="content-section">
+        <div class="content-container">
+            <h1>Silicon Photonics</h1>
+            <img src="upload/silicon1.png" style="width:70%;margin-top: 1cm; margin-bottom: 4mm;"> 
+        </div>
+    </section>
+
+    <!-- Contact Section (Placeholder) -->
+    <section id="contact" class="content-section">
+        <div class="content-container">
+            <h1>Contact Us</h1>
+            <p>We’re here to assist with any questions, project discussions, partnership inquiries, or general feedback. 
+                Our dedicated team at AIQUANTA Limited values every connection and strives to 
+                provide timely, personalized responses to help you.</p>
+            <h2>Our Location</h2>
+            <p>Visit or send mail to our office at:<br><br>
+
+            <b>AIQUANTA Limited</b><br>
+            Room 616, Building 12W, Phase 3<br>
+            Hong Kong Science & Technology Park<br>
+            Shatin, N.T., Hong Kong<br><br>
+            
+            Our location places us within a thriving innovation hub, allowing us to collaborate closely with researchers, entrepreneurs, and industry leaders.
+            
+            </p>
+
+            <h2>Call or Email Us</h2>
+            <p>Feel free to call us directly at <b>(852) 3618 7676</b> for immediate assistance during office hours, 
+            or send your inquiries to <a href="ricafan@aiquanta.ai"><b><u>ricafan@aiquanta.ai</u></b></a>. Whether it’s technical support, sales questions, or
+                partnership opportunities, we’re ready to help.</p>
+            
+            <h2>Office Hours</h2>
+            <p>Our team is available to respond and support you Monday through Friday, from 9:00 AM to 6:00 PM Hong Kong Time. 
+                Messages received outside of these hours will be addressed promptly on the next business day. </p>p
+           
+        </div>
+    </section>
+
+    <!-- Common Footer -->
+    <div class="footer-contact">
+        <img src="upload/logo.jpg" href="#home" onclick="showSection('home')" style="height: 60px; margin-bottom: 5mm;">
+        Room 616, Building 12W, Phase 3<br>
+        Hong Kong Science & Technology Park, Shatin, N.T., Hong Kong<br><br>
+        Phone: (852) 3618 7676<br>
+        Email: <a href="ricafan@aiquanta.ai">ricafan@aiquanta.ai</a><br><br>
+        Office Hours: Monday to Friday, 9:00 AM – 6:00 PM<br><br>
+    </div>
+
+
+    <!-- JavaScript for Content Switching -->
+    <script>
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            // Show selected section
+            document.getElementById(sectionId).classList.add('active');
+            // Update active nav link
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${sectionId}`) {
+                    link.classList.add('active');
+                }
+            });
+        }
+        // Show 'home' section by default
+        showSection('home');
+    </script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
