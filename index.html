@@ -458,6 +458,21 @@
                     link.classList.add('active');
                 }
             });
+            // Close navbar on mobile when link is clicked
+            document.querySelectorAll('.navbar-nav .nav-link').forEach(link => {
+                link.addEventListener('click', () => {
+                const navbar = document.querySelector('#navbarNav');
+                const bsCollapse = new bootstrap.Collapse(navbar, { toggle: false });
+                bsCollapse.hide();
+                });
+            });
+            document.addEventListener('click', (e) => {
+            const navbar = document.querySelector('#navbarNav');
+            const toggler = document.querySelector('.navbar-toggler');
+            if (!navbar.contains(e.target) && !toggler.contains(e.target) && navbar.classList.contains('show')) {
+                new bootstrap.Collapse(navbar, { toggle: false }).hide();
+            }
+            });
         }
         // Show 'home' section by default
         showSection('home');
